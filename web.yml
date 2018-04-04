@@ -124,7 +124,7 @@
     - name: create opt pinger
       become: true
       file:
-        path: '/opt/starling/'
+        path: '/opt/sushifish/'
         state: directory
         owner: deployer
         group: deployer
@@ -163,3 +163,4 @@
 # with web setup:
 # - copy the secret file to the server (in ~/starling_config)
 # - !!! the web server may not need erlang and elixir??????????
+# - the nginx sites-enabled config and symlink
