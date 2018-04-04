@@ -7,9 +7,9 @@ defmodule SushifishWeb.PageController do
 
   def rando(conn, _params) do
     codes =
-    case Mix.env do
+    case Application.get_env(:sushifish, :environment) do
       :test -> [401]
-      _     -> [401, 403, 404, 501, 503]
+      _     -> [100, 101, 102, 200, 201, 202, 401, 403, 404, 501, 503]
     end
     conn
     |> put_status(Enum.random(codes))

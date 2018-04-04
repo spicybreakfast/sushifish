@@ -62,6 +62,8 @@ config :logger, level: :info
 #     config :sushifish, SushifishWeb.Endpoint, server: true
 #
 
+config :sushifish, :environment, :prod
+
 # Finally import the config/prod.secret.exs
 # which should be versioned separately.
 import_config "prod.secret.exs"
