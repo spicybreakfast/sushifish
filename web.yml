@@ -1,0 +1,165 @@
+---
+- hosts: all
+  vars:
+    sudoers:
+      - deployer
+    website: sushifi.sh
+    letsencrypt_path: /etc/letsencrypt/live/{{ website }}/fullchain.pem
+    letsencrypt_email: sushifish@impossiblecreature.com
+
+  tasks:
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+
+    - name: Allow 'wheel' group to have passwordless sudo
+      become: true
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%wheel'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        validate: visudo -cf %s
+
+    - name: Add sudoers users to wheel group
+      user:
+        name: "{{ item }}"
+        shell: /bin/bash
+        groups: wheel
+        append: yes
+        generate_ssh_key: yes
+        ssh_key_bits: 2048
+        ssh_key_file: .ssh/starling
+      with_items: "{{ sudoers }}"
+
+    - name: Set up authorized keys for the deployer user
+      authorized_key: user=deployer key="{{item}}"
+      with_file:
+        - /Users/traviserard/.ssh/starling.pub
+
+    - name: Disallow root SSH access
+      become: true
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+        state: present
+
+    - name: reload service sshd, in all cases
+      become: true
+      systemd:
+        name: sshd
+        state: reloaded
+
+    - name: download erlang
+      become: true
+      remote_user: deployer
+      apt:
+        deb: https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+
+    - name: install erlang
+      become: true
+      remote_user: deployer
+      apt:
+        name: esl-erlang
+        update_cache: yes
+
+    - name: install elixir
+      become: true
+      remote_user: deployer
+      apt:
+        name: elixir
+
+    - name: install nginx
+      become: true
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+
+    - name: set firewall default policy
+      become: true
+      ufw:
+        state: enabled
+        policy: reject
+
+    - name: allow openssh
+      become: true
+      ufw:
+        state: enabled
+        rule: allow
+        name: OpenSSH
+
+    - name: allow nginx
+      become: true
+      ufw:
+        state: enabled
+        rule: allow
+        name: Nginx Full
+
+    - name: create nginx dirs
+      become: true
+      file:
+        path: /var/www/{{ item }}/html
+        owner: deployer
+        group: deployer
+        mode: 0755
+        state: directory
+      with_items: "{{ website }}"
+
+    - name: create nginx dirs
+      become: true
+      file:
+        path: '/var/www/'
+        state: directory
+        mode: 0755
+
+    - name: create default html file
+      copy:
+        dest: /var/www/{{ item }}/html/index.html
+        content: "abbot is death process."
+      with_items: "{{ website }}"
+
+    - name: create opt pinger
+      become: true
+      file:
+        path: '/opt/starling/'
+        state: directory
+        owner: deployer
+        group: deployer
+        mode: 0755
+
+    - name: get certbot package
+      remote_user: deployer
+      apt_repository:
+        repo: ppa:certbot/certbot
+        update_cache: yes
+
+    - name: install certbot
+      remote_user: deployer
+      become: true
+      apt:
+        name: python-certbot-nginx
+        update_cache: yes
+
+    - name: run certbot if not already run
+      become: true
+      command: certbot --nginx -d {{ website }} -d www.{{ website }} --email {{ letsencrypt_email }} --non-interactive --agree-tos
+      args:
+        creates: letsencrypt_path
+
+
+# from: https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-server-blocks-virtual-hosts-on-ubuntu-16-04
+# create: /etc/nginx/sites-available/startlingapp.io
+# symlink: sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+
+# with digio setup:
+# - permissions on pinger /opt/pinger/pinger
+# - the key setup. i guess i just use the starling key everywhere.
+# - I need to seperate the server setup configs (one for pheonix, one for pinger, one for builder etc)
+# - Once they are seperated, I should reun from scratch to make sure it is good to go
+
+# with web setup:
+# - copy the secret file to the server (in ~/starling_config)
+# - !!! the web server may not need erlang and elixir??????????
