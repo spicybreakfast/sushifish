@@ -4,10 +4,19 @@ html, body {
   "Droid Sans", "Helvetica Neue", sans-serif;
 
   background-color: #c9e2e8;
-
   color: #005d73;
-
   padding: 1em;
-
   letter-spacing: .05em;
+}
+
+a, a:visited {
+  color: #005d73;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #005d73;
+  font-weight: bold;
+  text-decoration: underline;
 }

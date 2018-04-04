@@ -9,17 +9,18 @@ defmodule SushifishWeb.PageController do
     codes =
     case Application.get_env(:sushifish, :environment) do
       :test -> [401]
-      _     -> [100, 101, 102, 200, 201, 202, 401, 403, 404, 501, 503]
+      _     -> [100, 201, 202, 403, 501, 503]
     end
+    code = Enum.random(codes)
     conn
-    |> put_status(Enum.random(codes))
-    |> Phoenix.Controller.render(SushifishWeb.ErrorView, :something)
+    |> put_status(code)
+    |> Phoenix.Controller.render(SushifishWeb.ErrorView, :something, code: code)
   end
 
   def show(conn, %{"id" => id}) do
     code = String.to_integer(id)
     conn
     |> put_status(code)
-    |> Phoenix.Controller.render(SushifishWeb.ErrorView, :something)
+    |> Phoenix.Controller.render(SushifishWeb.ErrorView, :something, code: code)
   end
 end

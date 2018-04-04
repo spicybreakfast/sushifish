@@ -5,8 +5,8 @@ defmodule SushifishWeb.ErrorView do
     "Page not found"
   end
 
-  def render("500.html", _assigns) do
-    "abbot is death process."
+  def render("500.html", assigns) do
+    "abbot is death process -> #{assigns[:code]}"
   end
 
   # In case no render clause matches or no
