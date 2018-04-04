@@ -6,7 +6,7 @@ defmodule SushifishWeb.ErrorView do
   end
 
   def render("500.html", _assigns) do
-    "Internal server error"
+    "abbot is death process."
   end
 
   # In case no render clause matches or no
