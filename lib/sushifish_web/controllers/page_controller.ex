@@ -6,8 +6,11 @@ defmodule SushifishWeb.PageController do
   end
 
   def rando(conn, _params) do
-    #codes = [401, 403, 404, 501, 503]
-    codes = [401]
+    codes =
+    case Mix.env do
+      :test -> [401]
+      _     -> [401, 403, 404, 501, 503]
+    end
     conn
     |> put_status(Enum.random(codes))
     |> Phoenix.Controller.render(SushifishWeb.ErrorView, :something)
