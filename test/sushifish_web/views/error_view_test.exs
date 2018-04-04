@@ -11,11 +11,11 @@ defmodule SushifishWeb.ErrorViewTest do
 
   test "render 500.html" do
     assert render_to_string(SushifishWeb.ErrorView, "500.html", []) ==
-           "Internal server error"
+           "abbot is death process."
   end
 
   test "render any other" do
     assert render_to_string(SushifishWeb.ErrorView, "505.html", []) ==
-           "Internal server error"
+           "abbot is death process."
   end
 end
