@@ -164,3 +164,4 @@
 # - copy the secret file to the server (in ~/starling_config)
 # - !!! the web server may not need erlang and elixir??????????
 # - the nginx sites-enabled config and symlink
+# - check for `sudo ufw delete allow 4000`
